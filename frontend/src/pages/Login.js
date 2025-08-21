@@ -71,7 +71,16 @@ const Login = () => {
           navigate("/teacher-dashboard");
         }
       } catch (err) {
-        alert("Invalid email or password");
+        console.error('Login error:', err);
+        if (err.response && err.response.data && err.response.data.message) {
+          alert(err.response.data.message);
+        } else if (err.response && err.response.status === 400) {
+          alert("Invalid email or password");
+        } else if (err.code === 'ECONNREFUSED' || err.message.includes('Network Error')) {
+          alert("Cannot connect to server. Please make sure the backend is running on port 5000.");
+        } else {
+          alert("Login failed. Please try again.");
+        }
         e.target.email.value = "";
         e.target.password.value = "";
       }

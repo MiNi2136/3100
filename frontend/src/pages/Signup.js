@@ -46,10 +46,20 @@ const Signup = () => {
           dob: date,
         };
         try {
-          await api.post("/users/signup", formData);
+          const response = await api.post("/users/signup", formData);
+          alert("Registration successful! Please login with your credentials.");
           navigate("/login");
         } catch (err) {
-          console.log(err);
+          console.error('Signup error:', err);
+          if (err.response && err.response.data && err.response.data.message) {
+            alert(err.response.data.message);
+          } else if (err.response && err.response.status === 400) {
+            alert("Registration failed. User may already exist.");
+          } else if (err.code === 'ECONNREFUSED' || err.message.includes('Network Error')) {
+            alert("Cannot connect to server. Please make sure the backend is running.");
+          } else {
+            alert("Registration failed. Please try again.");
+          }
         }
       } else {
         alert("Passwords do not match");

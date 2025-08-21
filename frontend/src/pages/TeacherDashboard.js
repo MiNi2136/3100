@@ -72,7 +72,7 @@ const TeacherDashboard = () => {
         </div>
         <div className="createbtncol">
           <button onClick={togglePopup} className="createbtn">
-            Create Session
+            QR Generator
           </button>
         </div>
       </div>

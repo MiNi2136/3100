@@ -30,6 +30,7 @@ api.interceptors.response.use(
       if (error.response.status !== 401) {
         console.error('API Error:', {
           status: error.response.status,
+          message: error.response.data?.message || 'Unknown error',
           data: error.response.data,
           url: error.config?.url
         });
@@ -47,6 +48,9 @@ api.interceptors.response.use(
           console.log('No authentication token provided');
         }
       }
+    } else if (error.code === 'ERR_NETWORK') {
+      console.error('Network Error: Cannot connect to backend server');
+      console.error('Make sure backend is running on:', API_BASE_URL);
     }
     return Promise.reject(error);
   }
