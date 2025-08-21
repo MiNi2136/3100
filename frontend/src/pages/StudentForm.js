@@ -1,6 +1,6 @@
 //create a new session component
 import React, { useState, useRef } from "react";
-import axios from "axios";
+import api from "../api";
 import "../styles/StudentForm.css";
 
 const StudentForm = ({ togglePopup }) => {
@@ -54,9 +54,10 @@ const StudentForm = ({ togglePopup }) => {
     e.preventDefault();
     let regno = e.target.regno.value;
     //get user IP address
-    axios.defaults.withCredentials = false;
-    const res = await axios.get("https://api64.ipify.org?format=json");
-    axios.defaults.withCredentials = true;
+    const originalWithCredentials = api.defaults.withCredentials;
+    api.defaults.withCredentials = false;
+    const res = await fetch("https://api64.ipify.org?format=json").then(res => res.json());
+    api.defaults.withCredentials = originalWithCredentials;
     //
     let IP = res.data.ip;
     if (navigator.geolocation) {
@@ -80,8 +81,8 @@ const StudentForm = ({ togglePopup }) => {
             };
             try {
               console.log("sending data to server");
-              const response = await axios.post(
-                "http://localhost:5050/sessions/attend_session",
+              const response = await api.post(
+                "/sessions/attend_session",
                 formData,
                 {
                   headers: {

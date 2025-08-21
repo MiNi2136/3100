@@ -6,10 +6,11 @@ import {
   Login,
   Logout,
   Register,
-  Nav,
   NewSession,
   StudentDashboard,
+  EnhancedStudentDashboard,
   ForgotPassword,
+  StudentProfileForm,
 } from "./pages/Index";
 
 const router = createBrowserRouter([
@@ -38,6 +39,14 @@ const router = createBrowserRouter([
         element: <StudentDashboard />,
       },
       {
+        path: "student-profile",
+        element: <StudentProfileForm />,
+      },
+      {
+        path: "enhanced-student-dashboard",
+        element: <EnhancedStudentDashboard />,
+      },
+      {
         path: "logout",
         element: <Logout />,
       },
@@ -60,7 +69,6 @@ const router = createBrowserRouter([
 function App() {
   return (
     <div>
-      <Nav />
       <RouterProvider router={router} />
     </div>
   );

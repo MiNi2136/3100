@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { SHA256 } from "crypto-js";
-import axios from "axios";
+import api from "../api";
 import "../styles/Login.css";
 import image512 from "../assets/logo512.png";
 import image192 from "../assets/logo192.png";
@@ -9,7 +9,6 @@ import see from "../assets/see.png";
 import hide from "../assets/hide.png";
 
 const queryParameters = new URLSearchParams(window.location.search);
-axios.defaults.withCredentials = true;
 
 const Login = () => {
   // eslint-disable-next-line
@@ -44,8 +43,8 @@ const Login = () => {
         password,
       };
       try {
-        const response = await axios.post(
-          "http://localhost:5050/users/signin",
+        const response = await api.post(
+          "/users/signin",
           formData
         );
         let user = response.data.user;
@@ -58,7 +57,7 @@ const Login = () => {
         localStorage.setItem("type", type);
         localStorage.setItem("token", token);
         if (response.data.type === "student") {
-          if (session_id !== "" && teacher !== "") {
+          if (session_id && teacher && session_id !== "null" && teacher !== "null") {
             navigate(
               "/student-dashboard?session_id=" +
                 session_id +
@@ -96,7 +95,7 @@ const Login = () => {
       if (localStorage.getItem("type") === "teacher") {
         navigate("/teacher-dashboard");
       } else {
-        if (session_id !== "" && teacher !== "") {
+        if (session_id && teacher && session_id !== "null" && teacher !== "null") {
           navigate(
             "/student-dashboard?session_id=" + session_id + "&email=" + teacher
           );

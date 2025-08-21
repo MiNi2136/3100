@@ -1,8 +1,18 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
+import Nav from "./Nav";
 
 const HomeLayout = () => {
-  return <Outlet />;
+  const location = useLocation();
+  const isTeacherDashboard = location.pathname === '/teacher-dashboard';
+  const isStudentDashboard = location.pathname === '/student-dashboard';
+  
+  return (
+    <div>
+      {!isTeacherDashboard && !isStudentDashboard && <Nav />}
+      <Outlet />
+    </div>
+  );
 };
 
 export default HomeLayout;

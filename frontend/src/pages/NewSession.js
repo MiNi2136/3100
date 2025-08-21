@@ -1,6 +1,6 @@
 //create a new session component
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../api";
 import QRCode from "qrcode.react";
 import "../styles/NewSession.css";
 
@@ -53,8 +53,8 @@ const NewSession = ({ togglePopup }) => {
               radius,
             };
             try {
-              const response = await axios.post(
-                "http://localhost:5050/sessions/create",
+              const response = await api.post(
+                "/sessions/create",
                 formData
               );
               setQrData(response.data.url);

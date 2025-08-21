@@ -7,15 +7,24 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import userRoutes from "./routes/userRoutes.js";
 import SessionRoutes from "./routes/SessionRoutes.js";
+import connectDB from "./config/db.js";
 
 // Initialize the app
 const app = express();
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB;
 // Middleware
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: function(origin, callback) {
+      const allowedOrigins = [process.env.CLIENT_URL || "http://localhost:3000", "http://localhost:3001"];
+      // allow requests with no origin (like mobile apps or curl requests)
+      if(!origin) return callback(null, true);
+      if(allowedOrigins.indexOf(origin) === -1){
+        const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
     credentials: true,
   })
 );
@@ -28,12 +37,7 @@ app.use(
   })
 );
 // Connect to MongoDB
-mongoose
-  .connect(MONGODB_URI, {})
-  .then(() => {
-    console.log("Database Connected");
-  })
-  .catch((err) => console.log(err));
+connectDB();
 
 // Routes
 app.use("/users", userRoutes);

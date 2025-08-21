@@ -2,25 +2,21 @@
 import React from "react";
 import "../styles/Nav.css";
 import { useEffect, useState } from "react";
-import UserDetails from "./UserDetails"; // Assuming both files are in the same directory
 import logo from "../assets/logo192.png";
-import logout from "../assets/logout.png";
 
-const Nav = () => {
+const Nav = ({ pageTitle = "EduAttend", userType = null }) => {
   // eslint-disable-next-line
   const [user, setuser] = useState({
     email: localStorage.getItem("email"),
     name: localStorage.getItem("name"),
-    pno: localStorage.getItem("pno"),
-    dob: localStorage.getItem("dob"),
+    type: localStorage.getItem("type"),
   });
 
   const refresh = () => {
     setuser({
       email: localStorage.getItem("email"),
       name: localStorage.getItem("name"),
-      pno: localStorage.getItem("pno"),
-      dob: localStorage.getItem("dob"),
+      type: localStorage.getItem("type"),
     });
   };
 
@@ -28,22 +24,32 @@ const Nav = () => {
     refresh();
   }, []);
 
+  // Determine what to show in the right corner based on user type or page
+  const getRightContent = () => {
+    // Always show user's name if available, regardless of type
+    if (user.name) {
+      return `${user.name}`;
+    } else if (user.type === 'student' || userType === 'student') {
+      return 'Student Profile';
+    } else if (user.type === 'teacher' || userType === 'teacher') {
+      return 'Teacher Profile';
+    } else {
+      return pageTitle;
+    }
+  };
+
   return (
     <div className="nav-container">
       <nav>
-        <ul className="nav-links">
-          <li className="nav-link">
-            <a href="/">
-              <img style={{ width: "30px" }} src={logo} alt="Home" />
-            </a>
-          </li>
-          <li className="nav-link logout" style={{ display: "none" }}>
-            <a href="/logout">
-              <img src={logout} alt="Logout" />
-            </a>
-          </li>
-        </ul>
-        <UserDetails user={user} />
+        <div className="nav-left">
+          <a href="/" className="logo-link">
+            <img style={{ width: "40px", height: "40px" }} src={logo} alt="EduAttend Logo" />
+            <span className="logo-text">EduAttend</span>
+          </a>
+        </div>
+        <div className="nav-right">
+          <span className="page-title">{getRightContent()}</span>
+        </div>
       </nav>
     </div>
   );

@@ -1,6 +1,6 @@
 //create a new session component
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api";
 import QRCode from "qrcode.react";
 import "../styles/SessionDetails.css";
 
@@ -8,8 +8,8 @@ const SessionDetails = (props) => {
   const [qr, setQR] = useState("");
 
   async function getQR() {
-    await axios
-      .post("http://localhost:5050/sessions/getQR", {
+    await api
+      .post("/sessions/getQR", {
         session_id: props.currentSession[0].session_id,
         token: localStorage.getItem("token"),
       })

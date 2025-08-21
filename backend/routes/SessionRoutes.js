@@ -1,6 +1,6 @@
 import { Router } from "express";
 const router = Router();
-import upload from "../middleware/Multer.js";
+import upload from "../middleware/multer.js";
 import SessionController from "../controllers/SessionController.js";
 import JWT from "../middleware/JWT.js";
 
@@ -27,5 +27,14 @@ router.post(
   JWT.verifyToken,
   SessionController.GetStudentSessions
 );
+
+// Get active sessions for students (no auth required for demo)
+router.get("/active-sessions", SessionController.GetActiveSessionsForStudents);
+
+// Submit attendance via QR scan
+router.post("/submit-attendance", SessionController.SubmitAttendance);
+
+// Get student attendance records
+router.get("/student-attendance", SessionController.GetStudentAttendance);
 
 export default router;

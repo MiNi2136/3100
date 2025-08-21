@@ -26,7 +26,7 @@ const Landing = () => {
         <About toggleDone={toggleDone} />
       ) : (
         <div className="landing-main">
-          <h1>Landing Page</h1>
+          <h1>QR-code Attendance System</h1>
           <p>Hello and welcome!</p>
           <Link to="/login" className="landing-login-button">
             Login

@@ -1,0 +1,219 @@
+/* TeacherProfile.css - Main styling for teacher profile interface */
+
+.teacher-profile-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: linear-gradient(to right, #f8f9fa, #e9ecef);
+}
+
+/* Top Navigation Bar Styles */
+.top-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 70px;
+  background: linear-gradient(135deg, #4b6cb7, #182848);
+  color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.logo h2 {
+  font-weight: 700;
+  font-size: 1.8rem;
+  margin: 0;
+  background: linear-gradient(45deg, #fff, #ececec);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  width: 40%;
+}
+
+.search-icon {
+  margin-right: 0.5rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.search-bar input {
+  background: transparent;
+  border: none;
+  color: white;
+  width: 100%;
+  outline: none;
+}
+
+.search-bar input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.profile-section {
+  position: relative;
+}
+
+.profile-dropdown {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.profile-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00b4db, #0083b0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  font-weight: bold;
+  color: white;
+}
+
+.profile-name {
+  font-weight: 500;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  width: 180px;
+  z-index: 1000;
+  margin-top: 10px;
+}
+
+.dropdown-item {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  color: #333;
+  transition: background-color 0.3s;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+}
+
+.dropdown-item svg {
+  margin-right: 10px;
+  color: #4b6cb7;
+}
+
+/* Main Content Area */
+.main-content {
+  display: flex;
+  flex: 1;
+}
+
+/* Side Navigation */
+.side-navbar {
+  width: 250px;
+  background: white;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+  padding: 2rem 0;
+  height: calc(100vh - 70px);
+  position: sticky;
+  top: 70px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 0.5rem;
+}
+
+.nav-item svg {
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
+
+.nav-item.active {
+  background: linear-gradient(90deg, rgba(75, 108, 183, 0.1), transparent);
+  color: #4b6cb7;
+  border-left: 4px solid #4b6cb7;
+}
+
+.nav-item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Content Area */
+.content-area {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  height: calc(100vh - 70px);
+}
+
+/* Loading spinner */
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-size: 1.5rem;
+  color: #4b6cb7;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+  .search-bar {
+    width: 30%;
+  }
+  
+  .side-navbar {
+    width: 200px;
+  }
+  
+  .nav-item span {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .top-navbar {
+    padding: 0 1rem;
+  }
+  
+  .search-bar {
+    display: none;
+  }
+  
+  .side-navbar {
+    width: 60px;
+    padding: 1.5rem 0;
+  }
+  
+  .nav-item {
+    justify-content: center;
+    padding: 1rem;
+  }
+  
+  .nav-item span {
+    display: none;
+  }
+  
+  .nav-item svg {
+    margin-right: 0;
+    font-size: 1.5rem;
+  }
+  
+  .content-area {
+    padding: 1.5rem;
+  }
+}

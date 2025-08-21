@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api";
 import "../styles/Dashboard.css";
 import { useNavigate } from "react-router-dom";
 import NewSession from "./NewSession";
 import SessionDetails from "./SessionDetails";
-
-axios.defaults.withCredentials = true;
 
 const TeacherDashboard = () => {
   //eslint-disable-next-line
@@ -19,8 +17,8 @@ const TeacherDashboard = () => {
   //update list of sessions
   const updateList = async () => {
     try {
-      const response = await axios.post(
-        "http://localhost:5050/sessions/getSessions",
+      const response = await api.post(
+        "/sessions/getSessions",
         {
           token: token,
         }

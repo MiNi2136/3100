@@ -18,14 +18,14 @@ const Logout = () => {
     localStorage.clear();
 
     setTimeout(() => {
-      navigate("/");
+      navigate("/login");
     }, 1000);
   });
 
   return (
     <div className="logout-main">
       <h1>Logout Successfull!</h1>
-      <p>You will be redirected to the landing page in 1 second...</p>
+      <p>You will be redirected to the login page in 1 second...</p>
     </div>
   );
 };

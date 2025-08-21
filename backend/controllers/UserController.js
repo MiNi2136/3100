@@ -138,12 +138,64 @@ function SendMail(req, res) {
   });
 }
 
+//get user profile
+async function Profile(req, res) {
+  try {
+    let token = req.body.token;
+    
+    // If no token in body, check Authorization header
+    if (!token && req.headers.authorization) {
+      token = req.headers.authorization.replace('Bearer ', '');
+    }
+    
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    // Handle demo token for development
+    if (token === 'demo-token-for-development') {
+      return res.status(200).json({ 
+        user: {
+          name: "Demo Teacher",
+          email: "demo@teacher.com",
+          type: "teacher"
+        }, 
+        type: "teacher" 
+      });
+    }
+
+    const decoded = JWT.verifyTokenSync(token);
+    if (!decoded) {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+
+    let user = await Student.findOne({ email: decoded.email });
+    let type = "student";
+    
+    if (!user) {
+      user = await Teacher.findOne({ email: decoded.email });
+      type = "teacher";
+    }
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.type = type;
+    res.status(200).json({ user: user, type: type });
+  } catch (err) {
+    console.error("Profile error:", err);
+    res.status(401).json({ message: "Authentication failed" });
+  }
+}
+
 const UserController = {
   Login,
   Signup,
   ForgotPassword,
   EditUserDetails,
   SendMail,
+  Profile,
 };
 
 export default UserController;

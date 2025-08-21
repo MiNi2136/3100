@@ -1,23 +1,76 @@
-# Getting Started with Create React App
+# Atendo - Attendance Management System
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Atendo is a modern attendance management system that allows teachers to create sessions and collect student attendance using QR codes and location-based verification.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- Teacher and Student user roles
+- Session creation and management
+- QR code-based attendance verification
+- Location-based attendance validation
+- Student dashboard with attendance history
+- Teacher dashboard with session management
 
-### `npm start`
+## Prerequisites
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Before you begin, ensure you have met the following requirements:
+- Node.js (v14.0.0 or higher)
+- MongoDB Atlas account (or local MongoDB installation)
+- Cloudinary account for image storage
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Installation and Setup
 
-### `npm test`
+1. Clone the repository
+```
+git clone https://github.com/MiNi2136/3100.git
+cd 3100
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+2. Environment setup
+
+Create a `.env` file in the backend directory with the following variables:
+```
+MONGODB_URI=your_mongodb_connection_string
+CLOUDINARY_CLOUD_NAME=your_cloudinary_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+JWT_SECRET=your_jwt_secret
+PORT=5000
+```
+
+Create a `.env` file in the frontend directory:
+```
+REACT_APP_BACKEND_URL=http://localhost:5000
+REACT_APP_CLIENT_URL=http://localhost:3000
+```
+
+3. Install dependencies
+
+```
+# Install backend dependencies
+cd backend
+npm install
+
+# Install frontend dependencies
+cd ../frontend
+npm install
+```
+
+4. Start the application
+
+You can start both the backend and frontend using the provided script:
+```
+./start-app.bat
+```
+
+Or start them separately:
+```
+# Start backend (from backend directory)
+npm start
+
+# Start frontend (from frontend directory)
+npm start
+```
 
 ### `npm run build`
 

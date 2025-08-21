@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "../styles/Signup.css";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api";
 import image512 from "../assets/logo512.png";
 import image192 from "../assets/logo192.png";
 import { SHA256 } from "crypto-js";
@@ -46,7 +46,7 @@ const Signup = () => {
           dob: date,
         };
         try {
-          await axios.post("http://localhost:5050/users/signup", formData);
+          await api.post("/users/signup", formData);
           navigate("/login");
         } catch (err) {
           console.log(err);
@@ -80,8 +80,8 @@ const Signup = () => {
       document.querySelector(".fourth-slide").style.display = "none";
     }
 
-    await axios
-      .post("http://localhost:5050/users/sendmail", {
+    await api
+      .post("/users/sendmail", {
         email: email,
       })
       .then((res) => {
