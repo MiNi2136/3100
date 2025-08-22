@@ -27,6 +27,9 @@ const StudentDashboard = () => {
     classroom: '',
     instructor: ''
   });
+  
+  // Teacher courses enrollment state
+  const [enrolledTeacherCourses, setEnrolledTeacherCourses] = useState([]);
 
   // Load schedule from localStorage on component mount
   useEffect(() => {
@@ -43,6 +46,11 @@ const StudentDashboard = () => {
     const savedAttendance = localStorage.getItem('attendanceHistory');
     if (savedAttendance) {
       setAttendanceHistory(JSON.parse(savedAttendance));
+    }
+    
+    const savedEnrolledCourses = localStorage.getItem('studentEnrolledCourses');
+    if (savedEnrolledCourses) {
+      setEnrolledTeacherCourses(JSON.parse(savedEnrolledCourses));
     }
   }, []);
 
@@ -262,6 +270,36 @@ Scan Type: ${isAutoScan ? 'Camera Scan' : 'Manual Entry'}`);
     return timeSlots.filter(slot => 
       Object.values(slot.classes).some(dayClasses => dayClasses.length > 0)
     );
+  };
+
+  // Course enrollment functions
+  const handleEnrollCourse = (course) => {
+    const updatedEnrolled = [...enrolledTeacherCourses, course.id];
+    setEnrolledTeacherCourses(updatedEnrolled);
+    localStorage.setItem('studentEnrolledCourses', JSON.stringify(updatedEnrolled));
+    
+    // Update enrollment count in teacher courses
+    const teacherCourses = JSON.parse(localStorage.getItem('teacherCourses') || '[]');
+    const updatedTeacherCourses = teacherCourses.map(tc => 
+      tc.id === course.id ? { ...tc, enrolledStudents: [...(tc.enrolledStudents || []), studentData.rollNumber || 'Student'] } : tc
+    );
+    localStorage.setItem('teacherCourses', JSON.stringify(updatedTeacherCourses));
+  };
+
+  const handleUnenrollCourse = (courseId) => {
+    const updatedEnrolled = enrolledTeacherCourses.filter(id => id !== courseId);
+    setEnrolledTeacherCourses(updatedEnrolled);
+    localStorage.setItem('studentEnrolledCourses', JSON.stringify(updatedEnrolled));
+    
+    // Update enrollment count in teacher courses
+    const teacherCourses = JSON.parse(localStorage.getItem('teacherCourses') || '[]');
+    const updatedTeacherCourses = teacherCourses.map(tc => 
+      tc.id === courseId ? { 
+        ...tc, 
+        enrolledStudents: (tc.enrolledStudents || []).filter(student => student !== (studentData.rollNumber || 'Student'))
+      } : tc
+    );
+    localStorage.setItem('teacherCourses', JSON.stringify(updatedTeacherCourses));
   };
 
   const renderDashboardTab = () => {
@@ -605,40 +643,338 @@ Scan Type: ${isAutoScan ? 'Camera Scan' : 'Manual Entry'}`);
 
   const renderCoursesTab = () => {
     const scheduledCourses = getScheduledCourses();
+    const teacherCourses = JSON.parse(localStorage.getItem('teacher_available_courses') || '[]');
+    
+    // Get available courses (active courses that student hasn't enrolled in)
+    const availableTeacherCourses = teacherCourses.filter(course => 
+      course.isActive && !enrolledTeacherCourses.some(enrolled => enrolled.id === course.id)
+    );
+    
+    // Handle course enrollment
+    const handleEnrollCourse = (course) => {
+      const studentInfo = JSON.parse(localStorage.getItem('studentData') || '{}');
+      const studentName = studentInfo.fullName || 'Student';
+      
+      // Add student to course's enrolled students
+      const updatedCourses = teacherCourses.map(c => 
+        c.id === course.id 
+          ? { 
+              ...c, 
+              enrolledStudents: [...(c.enrolledStudents || []), {
+                id: Date.now(),
+                name: studentName,
+                enrolledDate: new Date().toISOString()
+              }]
+            }
+          : c
+      );
+      
+      // Update teacher courses with new enrollment
+      localStorage.setItem('teacher_available_courses', JSON.stringify(updatedCourses));
+      
+      // Add to student's enrolled courses
+      const newEnrolledCourses = [...enrolledTeacherCourses, course];
+      setEnrolledTeacherCourses(newEnrolledCourses);
+      localStorage.setItem('studentEnrolledCourses', JSON.stringify(newEnrolledCourses));
+      
+      alert(`Successfully enrolled in "${course.courseName}"! 🎉`);
+    };
+    
+    // Handle course unenrollment
+    const handleUnenrollCourse = (courseId) => {
+      if (window.confirm('Are you sure you want to unenroll from this course?')) {
+        const studentInfo = JSON.parse(localStorage.getItem('studentData') || '{}');
+        const studentName = studentInfo.fullName || 'Student';
+        
+        // Remove student from course's enrolled students
+        const updatedCourses = teacherCourses.map(c => 
+          c.id === courseId 
+            ? { 
+                ...c, 
+                enrolledStudents: (c.enrolledStudents || []).filter(student => 
+                  student.name !== studentName
+                )
+              }
+            : c
+        );
+        
+        localStorage.setItem('teacher_available_courses', JSON.stringify(updatedCourses));
+        
+        // Remove from student's enrolled courses
+        const newEnrolledCourses = enrolledTeacherCourses.filter(course => course.id !== courseId);
+        setEnrolledTeacherCourses(newEnrolledCourses);
+        localStorage.setItem('studentEnrolledCourses', JSON.stringify(newEnrolledCourses));
+        
+        alert('Successfully unenrolled from the course.');
+      }
+    };
     
     return (
-      <div className="courses-content">
+      <div className="courses-tab">
         <div className="courses-header">
-          <h3>My Enrolled Courses</h3>
-          <button 
-            className="action-btn primary"
-            onClick={() => setShowAddScheduleModal(true)}
-          >
-            ➕ Add
-          </button>
-        </div>
-        
-        {scheduledCourses.length > 0 ? (
-          <div className="courses-grid">
-            {scheduledCourses.map(course => (
-              <div key={course.id} className="course-card">
-                <h4>{course.name}</h4>
-                <p><strong>Code:</strong> {course.code}</p>
-                <p><strong>Instructor:</strong> {course.instructor}</p>
-                <p><strong>Classroom:</strong> {course.classroom}</p>
-                <span className={`status-badge ${course.status}`}>
-                  {course.status === 'active' ? '✅ Active' : '⏸️ Inactive'}
-                </span>
+          <div className="header-content">
+            <div className="header-text">
+              <h3>📚 Course Enrollment</h3>
+              <p>Browse and enroll in available courses created by teachers</p>
+            </div>
+            <button 
+              className="add-schedule-btn"
+              onClick={() => setShowAddScheduleModal(true)}
+            >
+              <span className="btn-icon">➕</span>
+              <span className="btn-text">Add Manual Schedule</span>
+            </button>
+          </div>
+          
+          <div className="enrollment-stats">
+            <div className="stat-card">
+              <div className="stat-icon">✅</div>
+              <div className="stat-info">
+                <div className="stat-number">{enrolledTeacherCourses.length}</div>
+                <div className="stat-label">Enrolled Courses</div>
               </div>
-            ))}
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon">🔍</div>
+              <div className="stat-info">
+                <div className="stat-number">{availableTeacherCourses.length}</div>
+                <div className="stat-label">Available Courses</div>
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon">📅</div>
+              <div className="stat-info">
+                <div className="stat-number">{scheduledCourses.length}</div>
+                <div className="stat-label">Manual Schedules</div>
+              </div>
+            </div>
           </div>
-        ) : (
-          <div className="no-courses-message">
-            <div className="no-courses-icon">📚</div>
-            <h4>No courses enrolled</h4>
-            <p>Start by adding your first course to create your schedule.</p>
-          </div>
-        )}
+        </div>
+
+        <div className="courses-content">
+          {/* Enrolled Teacher Courses */}
+          {enrolledTeacherCourses.length > 0 && (
+            <div className="course-section">
+              <div className="section-header">
+                <h4>✅ My Enrolled Courses</h4>
+                <span className="course-count">{enrolledTeacherCourses.length} course{enrolledTeacherCourses.length !== 1 ? 's' : ''}</span>
+              </div>
+              <div className="courses-grid">
+                {enrolledTeacherCourses.map(course => (
+                  <div key={course.id} className="course-card enrolled">
+                    <div className="course-card-header">
+                      <div className="course-title-section">
+                        <h5 className="course-title">{course.courseName}</h5>
+                        <span className="course-code">{course.courseCode}</span>
+                      </div>
+                      <div className="enrollment-badge">
+                        <span className="badge-icon">✅</span>
+                        <span className="badge-text">Enrolled</span>
+                      </div>
+                    </div>
+                    
+                    <div className="course-card-body">
+                      {course.description && (
+                        <p className="course-description">{course.description}</p>
+                      )}
+                      
+                      <div className="course-info-grid">
+                        <div className="info-item">
+                          <div className="info-label">Department</div>
+                          <div className="info-value">{course.department || 'General'}</div>
+                        </div>
+                        <div className="info-item">
+                          <div className="info-label">Credits</div>
+                          <div className="info-value">{course.credits || 'N/A'}</div>
+                        </div>
+                        <div className="info-item">
+                          <div className="info-label">Semester</div>
+                          <div className="info-value">{course.semester || 'N/A'}</div>
+                        </div>
+                        <div className="info-item">
+                          <div className="info-label">Enrolled</div>
+                          <div className="info-value">{course.enrolledStudents?.length || 0} students</div>
+                        </div>
+                      </div>
+
+                      {course.schedule && course.schedule.days && course.schedule.days.length > 0 && (
+                        <div className="course-schedule">
+                          <div className="schedule-header">
+                            <span className="schedule-icon">📅</span>
+                            <span className="schedule-title">Class Schedule</span>
+                          </div>
+                          <div className="schedule-details">
+                            <div className="schedule-days">{course.schedule.days.join(', ')}</div>
+                            <div className="schedule-time">
+                              {course.schedule.startTime} - {course.schedule.endTime}
+                            </div>
+                            {course.schedule.classroom && (
+                              <div className="schedule-room">📍 {course.schedule.classroom}</div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="course-card-footer">
+                      <button 
+                        className="unenroll-btn"
+                        onClick={() => handleUnenrollCourse(course.id)}
+                      >
+                        <span className="btn-icon">📤</span>
+                        <span className="btn-text">Unenroll</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Available Teacher Courses for Enrollment */}
+          {availableTeacherCourses.length > 0 && (
+            <div className="course-section">
+              <div className="section-header">
+                <h4>🔍 Available for Enrollment</h4>
+                <span className="course-count">{availableTeacherCourses.length} course{availableTeacherCourses.length !== 1 ? 's' : ''}</span>
+              </div>
+              <div className="courses-grid">
+                {availableTeacherCourses.map(course => (
+                  <div key={course.id} className="course-card available">
+                    <div className="course-card-header">
+                      <div className="course-title-section">
+                        <h5 className="course-title">{course.courseName}</h5>
+                        <span className="course-code">{course.courseCode}</span>
+                      </div>
+                      <div className="availability-badge">
+                        <span className="badge-icon">🔓</span>
+                        <span className="badge-text">Available</span>
+                      </div>
+                    </div>
+                    
+                    <div className="course-card-body">
+                      {course.description && (
+                        <p className="course-description">{course.description}</p>
+                      )}
+                      
+                      <div className="course-info-grid">
+                        <div className="info-item">
+                          <div className="info-label">Department</div>
+                          <div className="info-value">{course.department || 'General'}</div>
+                        </div>
+                        <div className="info-item">
+                          <div className="info-label">Credits</div>
+                          <div className="info-value">{course.credits || 'N/A'}</div>
+                        </div>
+                        <div className="info-item">
+                          <div className="info-label">Semester</div>
+                          <div className="info-value">{course.semester || 'N/A'}</div>
+                        </div>
+                        <div className="info-item">
+                          <div className="info-label">Enrolled</div>
+                          <div className="info-value">
+                            {course.enrolledStudents?.length || 0}
+                            {course.maxStudents && `/${course.maxStudents}`} students
+                          </div>
+                        </div>
+                      </div>
+
+                      {course.schedule && course.schedule.days && course.schedule.days.length > 0 && (
+                        <div className="course-schedule">
+                          <div className="schedule-header">
+                            <span className="schedule-icon">📅</span>
+                            <span className="schedule-title">Class Schedule</span>
+                          </div>
+                          <div className="schedule-details">
+                            <div className="schedule-days">{course.schedule.days.join(', ')}</div>
+                            <div className="schedule-time">
+                              {course.schedule.startTime} - {course.schedule.endTime}
+                            </div>
+                            {course.schedule.classroom && (
+                              <div className="schedule-room">📍 {course.schedule.classroom}</div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="course-card-footer">
+                      <button 
+                        className="enroll-btn"
+                        onClick={() => handleEnrollCourse(course)}
+                        disabled={course.maxStudents && course.enrolledStudents?.length >= course.maxStudents}
+                      >
+                        <span className="btn-icon">📚</span>
+                        <span className="btn-text">
+                          {course.maxStudents && course.enrolledStudents?.length >= course.maxStudents 
+                            ? 'Course Full' 
+                            : 'Enroll Now'}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Manual Schedule Courses */}
+          {scheduledCourses.length > 0 && (
+            <div className="course-section">
+              <div className="section-header">
+                <h4>📅 Manual Schedule</h4>
+                <span className="course-count">{scheduledCourses.length} item{scheduledCourses.length !== 1 ? 's' : ''}</span>
+              </div>
+              <div className="courses-grid">
+                {scheduledCourses.map(course => (
+                  <div key={course.id} className="course-card manual">
+                    <div className="course-card-header">
+                      <div className="course-title-section">
+                        <h5 className="course-title">{course.name}</h5>
+                        <span className="course-code">{course.code}</span>
+                      </div>
+                      <div className={`status-badge ${course.status}`}>
+                        <span className="badge-icon">{course.status === 'active' ? '✅' : '⏸️'}</span>
+                        <span className="badge-text">{course.status === 'active' ? 'Active' : 'Inactive'}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="course-card-body">
+                      <div className="course-info-grid">
+                        <div className="info-item">
+                          <div className="info-label">Instructor</div>
+                          <div className="info-value">{course.instructor}</div>
+                        </div>
+                        <div className="info-item">
+                          <div className="info-label">Classroom</div>
+                          <div className="info-value">{course.classroom}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* No Courses Message */}
+          {scheduledCourses.length === 0 && enrolledTeacherCourses.length === 0 && availableTeacherCourses.length === 0 && (
+            <div className="no-courses">
+              <div className="no-courses-icon">📚</div>
+              <h3>No Courses Available</h3>
+              <p>There are currently no courses generated for enrollment. Teachers need to create courses first.</p>
+              <div className="no-courses-actions">
+                <button 
+                  className="add-manual-schedule-btn"
+                  onClick={() => setShowAddScheduleModal(true)}
+                >
+                  <span className="btn-icon">📅</span>
+                  Add Manual Schedule Entry
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     );
   };
